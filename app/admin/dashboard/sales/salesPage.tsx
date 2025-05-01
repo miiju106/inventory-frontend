@@ -244,7 +244,7 @@ const SalesPage = () => {
     onDeleteOpen();
   };
 
-  console.log(inventoryArray);
+  
 
   return (
     <>
