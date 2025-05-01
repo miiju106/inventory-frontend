@@ -19,6 +19,7 @@ type AuthContextType = {
   user: User | null;
   login: () => void;
   logout: () => void;
+  logOutByUser: () => void;
   loading: boolean | null;
   isAuthenticated: boolean | null;
 };
@@ -103,9 +104,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/");
   };
 
+  const logOutByUser = ()=>{
+    Cookies.remove("token");
+    toast.warning("Logged out successfully.");
+    router.push("/");
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, loading, isAuthenticated }}
+      value={{ user, login, logout, logOutByUser, loading, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>

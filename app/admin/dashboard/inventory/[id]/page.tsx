@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { IoIosArrowDown } from "react-icons/io";
-import { AiOutlineClose } from "react-icons/ai";
 import { FaArrowLeft } from "react-icons/fa";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -36,14 +35,10 @@ interface FormInventory {
   // sold: boolean;
 }
 
-interface InventoryData { 
+interface InventoryData {
   [key: string]: any;
   _id: string;
 }
-
-// interface FormInventory {
-//   [key: string]: any;
-// }
 
 type Category = {
   _id: string;
@@ -57,7 +52,7 @@ type Supplier = {
 
 const validationSchema = Yup.object({
   itemName: Yup.string().required("Stock name is required"),
-  category: Yup.string().required("Category is required"),  
+  category: Yup.string().required("Category is required"),
   qty: Yup.number()
     .typeError("Quantity of the stock must be a number")
     .required("Quantity is required"),
@@ -70,7 +65,6 @@ const validationSchema = Yup.object({
   // images: Yup.array()
   //   .of(Yup.string().required("Image is required"))
   //   .min(1, "At least one image is required"),
-  
 });
 
 const Page = () => {
@@ -97,8 +91,6 @@ const Page = () => {
         setSelectedInventory(res1.data.stock);
         setCategories(res2.data.categories);
         setSuppliers(res3.data.suppliers);
-
-        
       } catch (error) {
         console.log(error);
       } finally {
@@ -134,49 +126,46 @@ const Page = () => {
     return caplitalizeText;
   };
 
-  const handleSubmit = async (values: any, { setSubmitting}: FormikHelpers<FormInventory>) => {    
-   
-    console.log("Submitting", values);
+  const handleSubmit = async (
+    values: any,
+    { setSubmitting }: FormikHelpers<FormInventory>
+  ) => {
     const formData = {
-      ...values,      
+      ...values,
       available: values.available === "true",
     };
 
-      
-    if(!selectedInventory){
-      toast.error("No item selected")
-      setSubmitting(false)
+    if (!selectedInventory) {
+      toast.error("No item selected");
+      setSubmitting(false);
       return;
-    }   
-    const updatedItem:Record<string, any> = Object.keys(selectedInventory).reduce(
-      (acc:Record<string, any>, current:string) => {
-        if (formData[current] !== selectedInventory[current]) {
-          acc[current] = formData[current];
-        }
+    }
+    const updatedItem: Record<string, any> = Object.keys(
+      selectedInventory
+    ).reduce((acc: Record<string, any>, current: string) => {
+      if (formData[current] !== selectedInventory[current]) {
+        acc[current] = formData[current];
+      }
 
-        return acc;
-      },
-      {}
-    );
+      return acc;
+    }, {});
 
     try {
-      const response = await axios.put(`/admin/update-stock/${id}`, updatedItem);
-     
+      const response = await axios.put(
+        `/admin/update-stock/${id}`,
+        updatedItem
+      );
+
       toast.success("Stock Updated successfully!");
     } catch (error: any) {
       console.error(error);
       toast.error(
-        `Stock Update failed: ${
-          error.response?.data?.message || error.message
-        }`
+        `Stock Update failed: ${error.response?.data?.message || error.message}`
       );
     } finally {
       setSubmitting(false);
     }
   };
-
-
-  
 
   return (
     <div className="space-y-5 p-5">
@@ -192,8 +181,7 @@ const Page = () => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleSubmit}      
-       
+        onSubmit={handleSubmit}
       >
         {({ values, isSubmitting, setFieldValue }) => (
           <Form>
@@ -285,7 +273,7 @@ const Page = () => {
                 htmlFor="price"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Price<span className="text-red-500">*</span>
+                Price (&#36;)<span className="text-red-500">*</span>
               </label>
               <Field
                 type="number"
@@ -535,22 +523,11 @@ const Page = () => {
                 type="submit"
                 className="bg-[#024D91] hover:bg-[#024D91]/70 text-[#F9F9F9] py-2 px-7 rounded-md"
                 // disabled={isSubmitting}
-                // onClick={() => setFormStatus("publish")}
               >
                 {isSubmitting ? "Saving" : "Save"}
               </button>
-              
-             
-            
 
-              {/* <button
-            type="submit"
-            className="border py-2 px-5 rounded-md"
-            disabled={isSubmitting}
-            // onClick={() => setFormStatus("draft")}
-          >
-            Save as Draft
-          </button> */}
+              
             </div>
           </Form>
         )}

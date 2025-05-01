@@ -1,17 +1,33 @@
 "use client";
 import { useState, useEffect } from "react";
 import React, { ReactNode } from "react";
-import { IoGrid } from "react-icons/io5";
+import { BsGrid } from "react-icons/bs";
 import { MdOutlineInventory2 } from "react-icons/md";
 import Link from "next/link";
 import { FiMenu, FiX, FiLogOut } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
+import { BiPurchaseTagAlt } from "react-icons/bi";
+import { TbViewfinder } from "react-icons/tb";
+import { BiCategoryAlt } from "react-icons/bi";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { IoIosLogOut } from "react-icons/io";
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean | true>(true);
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean | false>(
     false
   );
+  const pathname = usePathname();
+  const auth = useAuth();
+
+  if (!auth)
+    return (
+      <div className="container">
+        <p>Authentication Error</p>
+      </div>
+    );
+  const { logOutByUser } = auth;
 
   useEffect(() => {
     const handleResizeSidebar = () => {
@@ -48,7 +64,7 @@ const Sidebar = () => {
   const sidebarLink = [
     {
       name: "Home",
-      icon: <IoGrid size="20" />,
+      icon: <BsGrid size="20" />,
       path: "/admin/dashboard",
     },
     {
@@ -56,9 +72,22 @@ const Sidebar = () => {
       icon: <MdOutlineInventory2 size="20" />,
       path: "/admin/dashboard/inventory",
     },
+    {
+      name: "Sales",
+      icon: <BiPurchaseTagAlt size="20" />,
+      path: "/admin/dashboard/sales",
+    },
+    {
+      name: "Suppliers",
+      icon: <TbViewfinder size="20" />,
+      path: "/admin/dashboard/suppliers",
+    },
+    {
+      name: "Categories",
+      icon: <BiCategoryAlt size="20" />,
+      path: "/admin/dashboard/categories",
+    },
   ];
-
-  console.log(isSidebarVisible);
 
   return (
     <aside>
@@ -67,8 +96,8 @@ const Sidebar = () => {
       </button>
 
       <div
-        className={`h-screen md:sticky fixed top-0 bg-gray-100 p-5 z-[100] ${
-          isSidebarOpen ? "w-[240px]" : "w-[90px]"
+        className={`h-screen md:sticky fixed top-0 bg-gray-100 py-5 z-[100] ${
+          isSidebarOpen ? "w-[240px]" : "w-[70px]"
         } ${isSidebarVisible ? "w-full" : "hidden"} md:block `}
       >
         <div className="flex flex-row-reverse w-full md:hidden">
@@ -79,20 +108,45 @@ const Sidebar = () => {
             size={24}
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col ">
           {sidebarLink.map((list, index) => (
             <Link
-              className="flex gap-2 items-center group hover:bg-[#FFE7BB] p-2"
+              className={`flex w-full gap-2 items-center group hover:bg-[#FFE7BB] p-3 ${
+                pathname == list.path ? "bg-[#5A05BA]/40 text-white" : ""
+              }`}
               key={index}
               href={list.path}
               onClick={() => {
                 setIsSidebarVisible(false);
               }}
             >
-              <div className="text-black/50">{list.icon}</div>
-              <div>{list.name}</div>
+              <div
+                className={`text-black/50 ${
+                  pathname == list.path ? "text-white" : ""
+                }`}
+              >
+                {list.icon}
+              </div>
+              <div
+                className={`${isSidebarOpen ? "block" : "md:hidden lg:block"}`}
+              >
+                {list.name}
+              </div>
             </Link>
           ))}
+          <div
+            className=" flex w-full gap-2 items-center group hover:bg-[#FFE7BB] p-3"
+            onClick={() => logOutByUser()}
+          >
+            <div>
+              <IoIosLogOut size="20" />
+            </div>
+            <div
+              className={`${isSidebarOpen ? "block" : "md:hidden lg:block"}`}
+            >
+              Log out
+            </div>
+          </div>
         </div>
       </div>
     </aside>

@@ -52,9 +52,9 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Pagination from "@/components/pagination";
-import AddInventory from "./components/addInventory";
-import DeleteInventory from "./components/deleteInventory";
-import SellInventory from "./components/sellInventory";
+import DeleteInventory from "../inventory/components/deleteInventory";
+// import AddInventory from "./components/addInventory";
+// import DeleteInventory from "./components/deleteInventory";
 
 type InventoryData = {
   _id: string;
@@ -69,15 +69,9 @@ type InventoryData = {
   updatedAt: string;
 };
 
-type SalesData = {
-  [key: string]: any;
-  _id: string;
-};
-
-const InventoryPage = () => {
+const SalesPage = () => {
   const [loading, setLoading] = useState<boolean | false>(false);
   const [inventoryArray, setInventoryArray] = useState<InventoryData[]>([]);
-  const [salesArray, setSalesArray] = useState<SalesData[]>([]);
   const [filteredInventory, setFilteredInventory] = useState<InventoryData[]>(
     []
   );
@@ -111,12 +105,6 @@ const InventoryPage = () => {
     onClose: onDeleteClose,
   } = useDisclosure();
 
-  const {
-    isOpen: isSellOpen,
-    onOpen: onSellOpen,
-    onClose: onSellClose,
-  } = useDisclosure();
-
   const router = useRouter();
   const pathname = usePathname();
 
@@ -124,12 +112,10 @@ const InventoryPage = () => {
     const fetchInven = async () => {
       try {
         setLoading(true);
-        const [res1, res2] = await Promise.all([
-          axios.get("/user/get-stocks"),
-          axios.get("/admin/get-sold-stock"),
-        ]);
-        setInventoryArray(res1.data.stocks.reverse());
-        setSalesArray(res2.data.stocks.reverse());
+        const invenData = await axios.get("/admin/get-sold-stock");
+
+        // data for sales product
+        setInventoryArray(invenData.data.stocks.reverse());
       } catch (error) {
         console.log(error);
       } finally {
@@ -258,27 +244,14 @@ const InventoryPage = () => {
     onDeleteOpen();
   };
 
-  const handleSellModal =(inven: InventoryData): void=>{
-    setSelectedInventory(inven);
-    onSellOpen()
-  }
-
-  const totalQtyWithTheSameItemName: number = salesArray.reduce(
-    (acc: number, currentValue: SalesData) => {
-      if (currentValue.stockId == selectedInventory?._id) {
-        acc = +currentValue.qty;
-      }
-      return acc;
-    },
-    0
-  );
+  console.log(inventoryArray);
 
   return (
     <>
       {" "}
       <Tabs className="bg-white p-2 rounded">
         <TabList>
-          <Tab>All Inventories</Tab>
+          <Tab>All Sales</Tab>
         </TabList>
 
         <TabPanels>
@@ -312,14 +285,6 @@ const InventoryPage = () => {
                   <IoFilterOutline />
                   Filter
                 </Button>
-                <button
-                  className={
-                    "flex items-center gap-2 bg-[#5A05BA] hover:bg-[#5A05BA]/70 !text-white p-2 rounded"
-                  }
-                  onClick={onAddOpen}
-                >
-                  Add Inventory
-                </button>
               </div>
             </div>
             <TableContainer>
@@ -332,7 +297,7 @@ const InventoryPage = () => {
                     <Th>Unit Price(&#36;)</Th>
                     <Th>Qty</Th>
                     <Th>Date(mm/dd/yyyy)</Th>
-
+                    <Th>Price Sold(&#36;)</Th>
                     <Th>More</Th>
                   </Tr>
                 </Thead>
@@ -342,11 +307,11 @@ const InventoryPage = () => {
                       <Tr key={list._id}>
                         <Td>{index + 1}</Td>
                         <Td>{sentenceCase(list.itemName)}</Td>
-                        <Td>{list.price}</Td>
+                        <Td>{list.price / list.qty}</Td>
 
                         <Td>{list.qty}</Td>
                         <Td>{new Date(list.createdAt).toLocaleDateString()}</Td>
-
+                        <Td>{list.price}</Td>
                         <Td>
                           <Menu>
                             <MenuButton
@@ -359,25 +324,12 @@ const InventoryPage = () => {
                               <MenuItem
                                 onClick={() => handleViewInventory(list)}
                               >
-                                View
+                                View 
                               </MenuItem>
-                              <MenuItem
-                                onClick={() =>
-                                  router.push(`inventory/${list._id}`)
-                                }
-                              >
-                                Edit
-                              </MenuItem>
-                              <MenuItem
-                              onClick={() =>
-                                handleSellModal(list)
-                              }
-                              >
-                                Sell
-                              </MenuItem>
-                              <MenuItem onClick={() => handleDeleteModal(list)}>
+
+                              {/* <MenuItem onClick={() => handleDeleteModal(list)}>
                                 Delete
-                              </MenuItem>
+                              </MenuItem> */}
                             </MenuList>
                           </Menu>
                         </Td>
@@ -432,7 +384,7 @@ const InventoryPage = () => {
                       {sentenceCase(selectedInventory.itemName)}
                     </h3>
                     <p className="text-sm text-black">
-                      Created:{" "}
+                      Date Sold:{" "}
                       {new Date(
                         selectedInventory.createdAt
                       ).toLocaleDateString()}
@@ -459,7 +411,7 @@ const InventoryPage = () => {
                 <div className="flex flex-col text-black text-sm">
                   <p> Unit Price</p>
                   <div className="border p-2 rounded-md">
-                    <p className="text-sm">{selectedInventory.price}</p>
+                    <p className="text-sm">{selectedInventory.price / selectedInventory.qty}</p>
                   </div>
                 </div>
 
@@ -471,29 +423,10 @@ const InventoryPage = () => {
                 </div>
 
                 <div className="flex flex-col text-black text-sm">
-                  <p> Quantity Sold</p>
-                  <div className="border p-2 rounded-md">
-                    <p className="text-sm">{totalQtyWithTheSameItemName}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col text-black text-sm">
-                  <p> Quantity Available</p>
+                  <p> Price Sold</p>
                   <div className="border p-2 rounded-md">
                     <p className="text-sm">
-                      {selectedInventory.qty >= totalQtyWithTheSameItemName
-                        ? selectedInventory.qty - totalQtyWithTheSameItemName
-                        : 0}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col text-black text-sm">
-                  <p> Available</p>
-                  <div className="border p-2 rounded-md">
-                    <p className="text-sm">
-                      {selectedInventory.qty > totalQtyWithTheSameItemName
-                        ? "Yes"
-                        : "No"}
+                      {selectedInventory.price}
                     </p>
                   </div>
                 </div>
@@ -589,7 +522,7 @@ const InventoryPage = () => {
               ))}
             </div>
 
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <h5 className="font-semibold mb-2">Available</h5>
               {inventoryAvailable.map((list, index) => (
                 <div key={index}>
@@ -601,7 +534,7 @@ const InventoryPage = () => {
                   <span className="ml-2">{list.toString()}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             <div className="mt-5 flex gap-3">
               <div className="flex flex-col gap-1">
@@ -649,12 +582,7 @@ const InventoryPage = () => {
           </div>
         </ModalContent>
       </Modal>
-      {/* Add Inventory */}
-      <AddInventory
-        isAddOpen={isAddOpen}
-        onAddOpen={onAddOpen}
-        onAddClose={onAddClose}
-      />
+
       {/* Delete Modal */}
       <DeleteInventory
         isDeleteOpen={isDeleteOpen}
@@ -662,14 +590,8 @@ const InventoryPage = () => {
         onDeleteClose={onDeleteClose}
         selectedInventory={selectedInventory}
       />
-      <SellInventory
-        isSellOpen={isSellOpen}
-        onSellOpen={onSellOpen}
-        onSellClose={onSellClose}
-        selectedInventory={selectedInventory}
-      />
     </>
   );
 };
 
-export default InventoryPage;
+export default SalesPage;
