@@ -22,16 +22,15 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
+  
   ModalCloseButton,
   Button,
-  Box,
-  Text,
+  
   Flex,
-  Grid,
-  GridItem,
+  
+  
   Input,
-  Badge,
+  
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -41,7 +40,7 @@ import {
   InputGroup,
   InputLeftElement,
   useDisclosure,
-  Image as ChakraImage,
+  
 } from "@chakra-ui/react";
 import Image from "next/image";
 import { IoFilterOutline } from "react-icons/io5";
@@ -50,7 +49,7 @@ import { HiMagnifyingGlass } from "react-icons/hi2";
 import { HiDotsVertical } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+
 import Pagination from "@/components/pagination";
 import DeleteInventory from "../inventory/components/deleteInventory";
 // import AddInventory from "./components/addInventory";
@@ -93,12 +92,7 @@ const SalesPage = () => {
     onClose: onFilterClose,
   } = useDisclosure();
 
-  const {
-    isOpen: isAddOpen,
-    onOpen: onAddOpen,
-    onClose: onAddClose,
-  } = useDisclosure();
-
+  
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
@@ -197,14 +191,7 @@ const SalesPage = () => {
     );
   };
 
-  // filter by availablity
-  const handleChangeAvailable = (available: boolean) => {
-    setSelectedAvailable((prev: boolean[]) =>
-      prev.includes(available)
-        ? prev.filter((list) => list !== available)
-        : [...prev, available]
-    );
-  };
+  
 
   // apply filter function
   const applyFilter = () => {
@@ -239,10 +226,10 @@ const SalesPage = () => {
     setFilteredInventory(output);
   };
 
-  const handleDeleteModal = (inven: InventoryData): void => {
-    setSelectedInventory(inven);
-    onDeleteOpen();
-  };
+  // const handleDeleteModal = (inven: InventoryData): void => {
+  //   setSelectedInventory(inven);
+  //   onDeleteOpen();
+  // };
 
   
 
@@ -585,8 +572,7 @@ const SalesPage = () => {
 
       {/* Delete Modal */}
       <DeleteInventory
-        isDeleteOpen={isDeleteOpen}
-        onDeleteOpen={onDeleteOpen}
+        isDeleteOpen={isDeleteOpen}        
         onDeleteClose={onDeleteClose}
         selectedInventory={selectedInventory}
       />

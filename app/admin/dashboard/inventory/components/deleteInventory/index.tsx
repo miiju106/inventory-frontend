@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
+  
   ModalCloseButton,  
 } from "@chakra-ui/react";
 import { toast } from "react-toastify";
@@ -27,7 +27,7 @@ type InventoryData = {
 
 type AddDeleteProps = {
   isDeleteOpen: boolean;
-  onDeleteOpen: () => void;
+  
   onDeleteClose: () => void;
   selectedInventory: InventoryData | null;
 };
@@ -35,7 +35,7 @@ type AddDeleteProps = {
 
 const DeleteInventory = ({
   isDeleteOpen,
-  onDeleteOpen,
+ 
   onDeleteClose,
   selectedInventory,
 }: AddDeleteProps) => {
@@ -46,7 +46,7 @@ const DeleteInventory = ({
     if (selectedInventory?._id) {
       try {
         setLoading(true);       
-        const response = await axios.delete(
+        await axios.delete(
           `/admin/delete-stock/${selectedInventory._id}`
         );
         toast.success("Stock Deleted successfully!");

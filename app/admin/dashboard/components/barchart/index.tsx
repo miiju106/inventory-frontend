@@ -12,13 +12,7 @@ import {
 } from "recharts";
 import { Select } from "@chakra-ui/react";
 import axios from "@/utils/api";
-import { PiDotOutlineBold } from "react-icons/pi";
 
-type ChartData = {
-  date: string;
-  sales: number;
-  purchase: number;
-};
 
 type SalesData = {
   _id: string;

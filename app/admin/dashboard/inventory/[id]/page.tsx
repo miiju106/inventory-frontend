@@ -1,15 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage} from "formik";
 import { useParams } from "next/navigation";
 import { usePathname } from "next/navigation";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaArrowLeft } from "react-icons/fa";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
+import { toast} from "react-toastify";
 import { FormikHelpers } from "formik";
 
 // type InventoryData = {
@@ -72,8 +71,7 @@ const Page = () => {
     useState<InventoryData | null>(null);
   const [loading, setLoading] = useState<boolean | false>(false);
   const [categories, setCategories] = useState<Category[] | []>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[] | []>([]);
-  const pathname = usePathname();
+  const [suppliers, setSuppliers] = useState<Supplier[] | []>([]); 
   const { id } = useParams();
   const router = useRouter();
 
@@ -81,7 +79,7 @@ const Page = () => {
     const fetchId = async () => {
       try {
         setLoading(true);
-        // const invenData = await axios.get(`/user/get-stock/${id}`);
+       
         const [res1, res2, res3] = await Promise.all([
           axios.get(`/user/get-stock/${id}`),
           axios.get("/admin/get-category"),
@@ -99,7 +97,7 @@ const Page = () => {
     };
 
     fetchId();
-  }, []);
+  }, [id]);
 
   if (loading) {
     return <div>Loading</div>;
@@ -151,7 +149,7 @@ const Page = () => {
     }, {});
 
     try {
-      const response = await axios.put(
+      await axios.put(
         `/admin/update-stock/${id}`,
         updatedItem
       );
@@ -183,7 +181,7 @@ const Page = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, isSubmitting, setFieldValue }) => (
+        {({ values, isSubmitting}) => (
           <Form>
             <div className="mb-5">
               <label

@@ -22,28 +22,22 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
+  
   ModalCloseButton,
-  Button,
-  Box,
-  Text,
+  
   Flex,
-  Grid,
-  GridItem,
+  
   Input,
   InputGroup,
   InputLeftElement,
   useDisclosure,
-  Image as ChakraImage,
+  
 } from "@chakra-ui/react";
-import Image from "next/image";
-import { IoFilterOutline } from "react-icons/io5";
+
 import axios from "@/utils/api";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import { HiDotsVertical } from "react-icons/hi";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+
 import Pagination from "@/components/pagination";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
@@ -79,12 +73,7 @@ const Page = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number | 10>(10);
   const [currentPage, setCurrentPage] = useState<number | 1>(1);
 
-  const {
-    isOpen: isFilterOpen,
-    onOpen: onFilterOpen,
-    onClose: onFilterClose,
-  } = useDisclosure();
-
+ 
   const {
     isOpen: isAddOpen,
     onOpen: onAddOpen,
@@ -112,14 +101,14 @@ const Page = () => {
     };
 
     fetchInven();
-  }, [suppliers]);
+  }, [suppliers.length]);
 
 
   useEffect(() => {
     if (filteredSupplier.length == 0) {
       setFilteredSupplier(suppliers);
     }
-  }, [suppliers]);
+  }, [suppliers.length]);
 
 
   // paginate filtered Inventory
@@ -137,7 +126,7 @@ const Page = () => {
    
 
     try {
-      const response = await axios.post("/admin/add-supplier", formData);
+      await axios.post("/admin/add-supplier", formData);
 
       toast.success("Supplier Added successfully!");
       resetForm();
@@ -291,7 +280,7 @@ const Page = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ values, isSubmitting, setFieldValue }) => (
+                {({ isSubmitting }) => (
                   <Form>
                     <div className="mb-5">
                       <label

@@ -5,20 +5,15 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
   ModalCloseButton,
-  Button,
-  useDisclosure,
   Flex,
 } from "@chakra-ui/react";
 import { IoIosArrowDown } from "react-icons/io";
-import { FaArrowLeft } from "react-icons/fa";
-import Image from "next/image";
 import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
 import axios from "@/utils/api";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 
 const validationSchema = Yup.object({
   itemName: Yup.string().required("Stock name is required"),
@@ -29,7 +24,7 @@ const validationSchema = Yup.object({
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required"),
-  supplier: Yup.string().required("Supplier is required"),  
+  supplier: Yup.string().required("Supplier is required"),
   // images: Yup.array()
   //   .of(Yup.string().required("Image is required"))
   //   .min(1, "At least one image is required"),
@@ -44,8 +39,7 @@ interface FormInventory {
 }
 
 type AddModalProps = {
-  isAddOpen: boolean;
-  onAddOpen: () => void;
+  isAddOpen: boolean; 
   onAddClose: () => void;
 };
 
@@ -59,18 +53,13 @@ type Supplier = {
   supplier: string;
 };
 
-
-
-const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
+const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
   const [categories, setCategories] = useState<Category[] | []>([]);
   const [suppliers, setSuppliers] = useState<Supplier[] | []>([]);
-  const [loading, setLoading] = useState<boolean | false>(false);
 
   useEffect(() => {
     const fetchId = async () => {
       try {
-        setLoading(true);
-
         const [res1, res2] = await Promise.all([
           axios.get("/admin/get-category"),
           axios.get("/admin/get-supplier"),
@@ -80,8 +69,6 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
         setSuppliers(res2.data.suppliers);
       } catch (error) {
         console.log(error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -102,9 +89,9 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
     } else if (a.category > b.category) {
       return 1;
     } else {
-      return 0; 
+      return 0;
     }
-  })
+  });
 
   suppliers?.sort((a: Supplier, b: Supplier) => {
     if (a.supplier < b.supplier) {
@@ -112,29 +99,27 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
     } else if (a.supplier > b.supplier) {
       return 1;
     } else {
-      return 0; 
+      return 0;
     }
   });
 
-
-  const handleSubmit = async (values: any, { setSubmitting, resetForm}: FormikHelpers<FormInventory>) => {               
-  
-      try {
-        const response = await axios.post("/admin/add-stock", values);
-       
-        toast.success("Stock Added successfully!");
-        resetForm()
-      } catch (error: any) {
-        console.error(error);
-        toast.error(
-          `Stock Adding failed: ${
-            error.response?.data?.message || error.message
-          }`
-        );
-      } finally {
-        setSubmitting(false);
-      }
-    };
+  const handleSubmit = async (
+    values: any,
+    { setSubmitting, resetForm }: FormikHelpers<FormInventory>
+  ) => {
+    try {
+      await axios.post("/admin/add-stock", values);
+      toast.success("Stock Added successfully!");
+      resetForm();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        `Stock Adding failed: ${error.response?.data?.message || error.message}`
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div>
@@ -145,7 +130,6 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
           <ModalCloseButton />
           <div className="p-5">
             <div className="space-y-5 p-5">
-             
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -233,7 +217,8 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
                         htmlFor="price"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Unit Price (&#36;)<span className="text-red-500">*</span>
+                        Unit Price (&#36;)
+                        <span className="text-red-500">*</span>
                       </label>
                       <Field
                         type="number"
@@ -323,14 +308,13 @@ const AddInventory = ({ isAddOpen, onAddOpen, onAddClose }: AddModalProps) => {
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
-                   
 
                     <Flex gap="4" direction="column" width="full" mt="4">
                       <button
                         className="bg-[#5A05BA] hover:bg-[#5A05BA]/70 text-white py-2 px-5 rounded-lg hover:bg-main-dark transition"
-                       type="submit"
+                        type="submit"
                       >
-                        {isSubmitting ? "Adding" : "Add Inventory"} 
+                        {isSubmitting ? "Adding" : "Add Inventory"}
                       </button>
                     </Flex>
                   </Form>

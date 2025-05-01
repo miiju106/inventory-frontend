@@ -22,16 +22,10 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
   ModalCloseButton,
   Button,
-  Box,
-  Text,
-  Flex,
-  Grid,
-  GridItem,
   Input,
-  Badge,
+  Flex,
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -41,7 +35,7 @@ import {
   InputGroup,
   InputLeftElement,
   useDisclosure,
-  Image as ChakraImage,
+  
 } from "@chakra-ui/react";
 import Image from "next/image";
 import { IoFilterOutline } from "react-icons/io5";
@@ -50,7 +44,6 @@ import { HiMagnifyingGlass } from "react-icons/hi2";
 import { HiDotsVertical } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import Pagination from "@/components/pagination";
 import AddInventory from "./components/addInventory";
 import DeleteInventory from "./components/deleteInventory";
@@ -258,10 +251,10 @@ const InventoryPage = () => {
     onDeleteOpen();
   };
 
-  const handleSellModal =(inven: InventoryData): void=>{
+  const handleSellModal = (inven: InventoryData): void => {
     setSelectedInventory(inven);
-    onSellOpen()
-  }
+    onSellOpen();
+  };
 
   const totalQtyWithTheSameItemName: number = salesArray.reduce(
     (acc: number, currentValue: SalesData) => {
@@ -368,11 +361,7 @@ const InventoryPage = () => {
                               >
                                 Edit
                               </MenuItem>
-                              <MenuItem
-                              onClick={() =>
-                                handleSellModal(list)
-                              }
-                              >
+                              <MenuItem onClick={() => handleSellModal(list)}>
                                 Sell
                               </MenuItem>
                               <MenuItem onClick={() => handleDeleteModal(list)}>
@@ -650,21 +639,15 @@ const InventoryPage = () => {
         </ModalContent>
       </Modal>
       {/* Add Inventory */}
-      <AddInventory
-        isAddOpen={isAddOpen}
-        onAddOpen={onAddOpen}
-        onAddClose={onAddClose}
-      />
+      <AddInventory isAddOpen={isAddOpen} onAddClose={onAddClose} />
       {/* Delete Modal */}
       <DeleteInventory
         isDeleteOpen={isDeleteOpen}
-        onDeleteOpen={onDeleteOpen}
         onDeleteClose={onDeleteClose}
         selectedInventory={selectedInventory}
       />
       <SellInventory
         isSellOpen={isSellOpen}
-        onSellOpen={onSellOpen}
         onSellClose={onSellClose}
         selectedInventory={selectedInventory}
       />

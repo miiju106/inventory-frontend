@@ -25,7 +25,7 @@ export default function ProtectedRoute({
       </div>
     );
 
-  const { user, isAuthenticated, loading } = auth;
+  const { user, loading } = auth;
 
   const token = Cookies.get("token");
   
@@ -40,6 +40,7 @@ export default function ProtectedRoute({
       }
     }
   }, [loading, user, token, router, requiredRoles]);
+  
 
   if (loading) {
     return (

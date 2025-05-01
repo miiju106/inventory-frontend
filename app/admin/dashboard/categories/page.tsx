@@ -21,27 +21,18 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  Box,
-  Text,
-  Flex,
-  Grid,
-  GridItem,
+  ModalHeader, 
+  ModalCloseButton, 
+  Flex,  
   Input,
   InputGroup,
   InputLeftElement,
   useDisclosure,
   Image as ChakraImage,
 } from "@chakra-ui/react";
-import Image from "next/image";
-import { IoFilterOutline } from "react-icons/io5";
 import axios from "@/utils/api";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import { HiDotsVertical } from "react-icons/hi";
-import Link from "next/link";
 import Pagination from "@/components/pagination";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
@@ -104,13 +95,13 @@ const Page = () => {
     };
 
     fetchInven();
-  }, [categories]);
+  }, [categories.length]);
 
   useEffect(() => {
     if (filteredCategory.length == 0) {
       setFilteredCategory(categories);
     }
-  }, [categories]);
+  }, [filteredCategory.length]);
 
   // paginate filtered Inventory
   const paginatedData = filteredCategory.slice(
@@ -126,7 +117,7 @@ const Page = () => {
     const formData = {category:values.category.toLowerCase()}
 
     try {
-      const response = await axios.post("/admin/add-category", formData);
+     await axios.post("/admin/add-category", formData);
 
       toast.success("Category Added successfully!");
       resetForm();
@@ -280,7 +271,7 @@ const Page = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ values, isSubmitting, setFieldValue }) => (
+                {({  isSubmitting }) => (
                   <Form>
                     <div className="mb-5">
                       <label

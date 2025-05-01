@@ -5,18 +5,15 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalBody,
   ModalCloseButton,
-  Button,
-  useDisclosure,
   Flex,
 } from "@chakra-ui/react";
-import Image from "next/image";
+
 import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
 import axios from "@/utils/api";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 
 const validationSchema = Yup.object({
   qty: Yup.number()
@@ -39,7 +36,7 @@ type InventoryData = {
 
 type SellModalProps = {
   isSellOpen: boolean;
-  onSellOpen: () => void;
+
   onSellClose: () => void;
   selectedInventory: InventoryData | null;
 };
@@ -50,7 +47,6 @@ type FormValue = {
 
 const SellInventory = ({
   isSellOpen,
-  onSellOpen,
   onSellClose,
   selectedInventory,
 }: SellModalProps) => {
@@ -63,10 +59,7 @@ const SellInventory = ({
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
     try {
-      const response = await axios.post(
-        `/admin/buy-stock/${selectedInventory?._id}`,
-        values
-      );
+      await axios.post(`/admin/buy-stock/${selectedInventory?._id}`, values);
 
       toast.success("Stock Sold successfully!");
       resetForm();
@@ -108,7 +101,7 @@ const SellInventory = ({
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ values, isSubmitting, setFieldValue }) => (
+                {({ values, isSubmitting }) => (
                   <Form>
                     <div className="mb-5">
                       <label

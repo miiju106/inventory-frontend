@@ -1,10 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
-import React, { ReactNode } from "react";
+import React, { useState, useEffect } from "react";
 import { BsGrid } from "react-icons/bs";
 import { MdOutlineInventory2 } from "react-icons/md";
 import Link from "next/link";
-import { FiMenu, FiX, FiLogOut } from "react-icons/fi";
+import { FiMenu} from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { BiPurchaseTagAlt } from "react-icons/bi";
 import { TbViewfinder } from "react-icons/tb";
@@ -57,9 +56,9 @@ const Sidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
   };
 
-  const toggleSidebarOpen = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // const toggleSidebarOpen = () => {
+  //   setIsSidebarOpen(!isSidebarOpen);
+  // };
 
   const sidebarLink = [
     {
