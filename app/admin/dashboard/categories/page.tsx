@@ -27,17 +27,17 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  useDisclosure,
-  Image as ChakraImage,
+  useDisclosure,  
 } from "@chakra-ui/react";
 import axios from "@/utils/api";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import { HiDotsVertical } from "react-icons/hi";
 import Pagination from "@/components/pagination";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
+import { AxiosError } from "axios";
 
 type Category = {
   _id: string;
@@ -110,7 +110,7 @@ const Page = () => {
   );
 
   const handleSubmit = async (
-    values: any,
+    values: Record<string, any>,
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
 
@@ -121,11 +121,12 @@ const Page = () => {
 
       toast.success("Category Added successfully!");
       resetForm();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
         `Category Adding failed: ${
-          error.response?.data?.message || error.message
+          err.response?.data?.message || err.message
         }`
       );
     } finally {
@@ -142,16 +143,17 @@ const Page = () => {
     if (selectedCategory?._id) {
       try {
         setIsLoading(true);
-        const response = await axios.delete(
+await axios.delete(
           `/admin/delete-category/${selectedCategory._id}`
         );
         toast.success("Category Deleted successfully!");
         onDeleteClose();
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
         console.error(error);
         toast.error(
           `Category Deleting failed: ${
-            error.response?.data?.message || error.message
+            err.response?.data?.message || err.message
           }`
         );
       } finally {

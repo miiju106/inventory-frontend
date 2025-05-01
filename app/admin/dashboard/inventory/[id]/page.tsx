@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage} from "formik";
 import { useParams } from "next/navigation";
-import { usePathname } from "next/navigation";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { IoIosArrowDown } from "react-icons/io";
@@ -10,6 +9,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { toast} from "react-toastify";
 import { FormikHelpers } from "formik";
+import { AxiosError } from "axios";
 
 // type InventoryData = {
 //   _id: string;
@@ -125,10 +125,10 @@ const Page = () => {
   };
 
   const handleSubmit = async (
-    values: any,
+    values: Record<string, any>,
     { setSubmitting }: FormikHelpers<FormInventory>
   ) => {
-    const formData = {
+    const formData:Record<string, any> = {
       ...values,
       available: values.available === "true",
     };
@@ -155,10 +155,11 @@ const Page = () => {
       );
 
       toast.success("Stock Updated successfully!");
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
-        `Stock Update failed: ${error.response?.data?.message || error.message}`
+        `Stock Update failed: ${err.response?.data?.message || err.message}`
       );
     } finally {
       setSubmitting(false);

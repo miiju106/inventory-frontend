@@ -95,7 +95,7 @@ const SalesPage = () => {
   
   const {
     isOpen: isDeleteOpen,
-    onOpen: onDeleteOpen,
+    // onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
 
@@ -169,10 +169,7 @@ const SalesPage = () => {
   const inventorySupplier: string[] = [
     ...new Set(inventoryArray.map((list) => list.supplier)),
   ];
-  const inventoryAvailable: boolean[] = [
-    ...new Set(inventoryArray.map((list) => list.available)),
-  ];
-
+ 
   // filter by category
   const handleChangeCategory = (category: string) => {
     setSelectedCategory((prev: string[]) =>

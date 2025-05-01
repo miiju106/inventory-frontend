@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Modal,
   ModalOverlay,
@@ -14,6 +14,7 @@ import { FormikHelpers } from "formik";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { AxiosError } from "axios";
 
 const validationSchema = Yup.object({
   qty: Yup.number()
@@ -55,7 +56,7 @@ const SellInventory = ({
   };
 
   const handleSubmit = async (
-    values: any,
+    values: Record<string, any>,
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
     try {
@@ -63,11 +64,12 @@ const SellInventory = ({
 
       toast.success("Stock Sold successfully!");
       resetForm();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
         `Stock Selling failed: ${
-          error.response?.data?.message || error.message
+          err.response?.data?.message || err.message
         }`
       );
     } finally {

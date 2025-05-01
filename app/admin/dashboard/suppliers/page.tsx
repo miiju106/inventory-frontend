@@ -40,9 +40,10 @@ import { HiDotsVertical } from "react-icons/hi";
 
 import Pagination from "@/components/pagination";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
+import  { AxiosError } from "axios";
 
 type Supplier = {
   _id: string;
@@ -108,7 +109,7 @@ const Page = () => {
     if (filteredSupplier.length == 0) {
       setFilteredSupplier(suppliers);
     }
-  }, [suppliers.length]);
+  }, [suppliers.length, filteredSupplier.length]);
 
 
   // paginate filtered Inventory
@@ -118,7 +119,7 @@ const Page = () => {
   );
 
   const handleSubmit = async (
-    values: any,
+    values: Record<string, any>,
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
 
@@ -130,11 +131,12 @@ const Page = () => {
 
       toast.success("Supplier Added successfully!");
       resetForm();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
         `Supplier Adding failed: ${
-          error.response?.data?.message || error.message
+          err.response?.data?.message || err.message
         }`
       );
     } finally {
@@ -151,16 +153,17 @@ const Page = () => {
     if (selectedSupplier?._id) {
       try {
         setIsLoading(true);
-        const response = await axios.delete(
+         await axios.delete(
           `/admin/delete-supplier/${selectedSupplier._id}`
         );
         toast.success("Supplier Deleted successfully!");
         onDeleteClose();
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
         console.error(error);
         toast.error(
           `Supplier Deleting failed: ${
-            error.response?.data?.message || error.message
+            err.response?.data?.message || err.message
           }`
         );
       } finally {

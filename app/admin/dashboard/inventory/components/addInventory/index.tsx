@@ -14,6 +14,7 @@ import { FormikHelpers } from "formik";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { AxiosError } from "axios";
 
 const validationSchema = Yup.object({
   itemName: Yup.string().required("Stock name is required"),
@@ -104,17 +105,18 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
   });
 
   const handleSubmit = async (
-    values: any,
+    values: Record<string, any>,
     { setSubmitting, resetForm }: FormikHelpers<FormInventory>
   ) => {
     try {
       await axios.post("/admin/add-stock", values);
       toast.success("Stock Added successfully!");
       resetForm();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
-        `Stock Adding failed: ${error.response?.data?.message || error.message}`
+        `Stock Adding failed: ${err.response?.data?.message || err.message}`
       );
     } finally {
       setSubmitting(false);
@@ -135,7 +137,7 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ values, isSubmitting, setFieldValue }) => (
+                {({ isSubmitting }) => (
                   <Form>
                     <div className="mb-5">
                       <label

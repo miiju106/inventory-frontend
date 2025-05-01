@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { Select } from "@chakra-ui/react";
 import axios from "@/utils/api";
+import { AxiosError } from "axios";
 
 
 type SalesData = {
@@ -59,8 +60,9 @@ const BarChartComponent = () => {
         // );
         
         setSalesArray(salesStock.data.stocks);
-      } catch (error: any) {
-        console.log(error.message);
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
+        console.log(err.message);
       }
     };
     fetchData();
@@ -208,7 +210,7 @@ const BarChartComponent = () => {
   //   );
   // };
 
-  const tickFormatter = (value:any) => `${value}`;
+  // const tickFormatter = (value:any) => `${value}`;
 
   return (
     <div className="w-full">
@@ -237,7 +239,7 @@ const BarChartComponent = () => {
             <CartesianGrid strokeDasharray="" stroke="#ddd" vertical={false} />
             <XAxis dataKey="date" />
             <YAxis
-              tickFormatter={tickFormatter}
+              // tickFormatter={tickFormatter}
               // domain={[0, maxValue]}
               allowDecimals={false}
             />

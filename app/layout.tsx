@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Onest } from "next/font/google";
+import { Onest } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
 import { ToastContainer } from "react-toastify";

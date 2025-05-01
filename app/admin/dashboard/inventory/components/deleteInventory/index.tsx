@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { toast } from "react-toastify";
 import axios from "@/utils/api";
+import { AxiosError } from "axios";
 
 type InventoryData = {
   _id: string;
@@ -51,11 +52,12 @@ const DeleteInventory = ({
         );
         toast.success("Stock Deleted successfully!");
         onDeleteClose();
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
         console.error(error);
         toast.error(
           `Stock Deleting failed: ${
-            error.response?.data?.message || error.message
+            err.response?.data?.message || err.message
           }`
         );
       } finally {
