@@ -210,7 +210,7 @@ const BarChartComponent = () => {
   //   );
   // };
 
-  // const tickFormatter = (value:any) => `${value}`;
+  const tickFormatter = (value:any) => `${value}`;
 
   return (
     <div className="w-full">
@@ -239,7 +239,7 @@ const BarChartComponent = () => {
             <CartesianGrid strokeDasharray="" stroke="#ddd" vertical={false} />
             <XAxis dataKey="date" />
             <YAxis
-              // tickFormatter={tickFormatter}
+              tickFormatter={tickFormatter}
               // domain={[0, maxValue]}
               allowDecimals={false}
             />

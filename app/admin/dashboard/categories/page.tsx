@@ -101,7 +101,7 @@ const Page = () => {
     if (filteredCategory.length == 0) {
       setFilteredCategory(categories);
     }
-  }, [filteredCategory.length]);
+  }, [filteredCategory.length, categories.length]);
 
   // paginate filtered Inventory
   const paginatedData = filteredCategory.slice(
@@ -110,7 +110,7 @@ const Page = () => {
   );
 
   const handleSubmit = async (
-    values: Record<string, any>,
+    values: FormValue,
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
 
