@@ -13,7 +13,9 @@ import { ToastContainer } from "react-toastify";
 //   variable: "--font-geist-mono",
 //   subsets: ["latin"],
 // });
-export const onestSans = Onest({
+
+
+const onestSans = Onest({
   subsets: ["latin"],
   weight: ["100", "300", "400", "700", "900"],
   display: "swap",
