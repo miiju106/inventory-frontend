@@ -73,6 +73,7 @@ const Page = () => {
   );
   const [itemsPerPage, setItemsPerPage] = useState<number | 10>(10);
   const [currentPage, setCurrentPage] = useState<number | 1>(1);
+  const [searchValue, setSearchValue] = useState<string | "">("");
 
  
   const {
@@ -94,6 +95,7 @@ const Page = () => {
         setLoading(true);
         const supplierData = await axios.get("/admin/get-supplier");        
         setSuppliers(supplierData.data.suppliers);
+       
       } catch (error) {
         console.log(error);
       } finally {
@@ -102,14 +104,19 @@ const Page = () => {
     };
 
     fetchInven();
-  }, [suppliers.length]);
+    const interval = setInterval(fetchInven, 5000); // poll every 5s
+
+    return () => clearInterval(interval);
+
+
+  }, []);
 
 
   useEffect(() => {
-    if (filteredSupplier.length == 0) {
+    if (searchValue.length == 0) {
       setFilteredSupplier(suppliers);
     }
-  }, [suppliers.length, filteredSupplier.length]);
+  }, [searchValue, suppliers.length, filteredSupplier.length]);
 
 
   // paginate filtered Inventory
@@ -172,6 +179,8 @@ const Page = () => {
     }
   };
 
+  
+
   return (
     <>
       {" "}
@@ -190,7 +199,10 @@ const Page = () => {
                 <Input
                   type="text"
                   placeholder="Search"
+                  value={searchValue}
                   onChange={(e) => {
+                    const searchInput = e.target.value
+                    setSearchValue(searchInput)
                     const filtered = suppliers?.filter((list) => {
                       return list.supplier
                         .toLowerCase()
@@ -252,7 +264,7 @@ const Page = () => {
                   ) : (
                     <Tr>
                       <Td colSpan={7} textAlign="center">
-                        {loading == true ? (
+                        {loading  ? (
                           "loading..."
                         ) : (
                           <div className="flex flex-col items-center justify-center w-full">

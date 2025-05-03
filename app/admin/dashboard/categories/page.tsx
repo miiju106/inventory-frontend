@@ -21,13 +21,13 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader, 
-  ModalCloseButton, 
-  Flex,  
+  ModalHeader,
+  ModalCloseButton,
+  Flex,
   Input,
   InputGroup,
   InputLeftElement,
-  useDisclosure,  
+  useDisclosure,
 } from "@chakra-ui/react";
 import axios from "@/utils/api";
 import { HiMagnifyingGlass } from "react-icons/hi2";
@@ -63,8 +63,8 @@ const Page = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState<number | 10>(10);
   const [currentPage, setCurrentPage] = useState<number | 1>(1);
+  const [searchValue, setSearchValue] = useState<string | "">("");
 
-  
   const {
     isOpen: isAddOpen,
     onOpen: onAddOpen,
@@ -85,7 +85,7 @@ const Page = () => {
     const fetchInven = async () => {
       try {
         setLoading(true);
-        const categoryData = await axios.get("/admin/get-category");        
+        const categoryData = await axios.get("/admin/get-category");
         setCategories(categoryData.data.categories);
       } catch (error) {
         console.log(error);
@@ -95,10 +95,13 @@ const Page = () => {
     };
 
     fetchInven();
+    const interval = setInterval(fetchInven, 5000); // poll every 5s
+
+    return () => clearInterval(interval);
   }, [categories.length]);
 
   useEffect(() => {
-    if (filteredCategory.length == 0) {
+    if (searchValue.length == 0) {
       setFilteredCategory(categories);
     }
   }, [filteredCategory.length, categories.length]);
@@ -113,11 +116,10 @@ const Page = () => {
     values: FormValue,
     { setSubmitting, resetForm }: FormikHelpers<FormValue>
   ) => {
-
-    const formData = {category:values.category.toLowerCase()}
+    const formData = { category: values.category.toLowerCase() };
 
     try {
-     await axios.post("/admin/add-category", formData);
+      await axios.post("/admin/add-category", formData);
 
       toast.success("Category Added successfully!");
       resetForm();
@@ -125,9 +127,7 @@ const Page = () => {
       const err = error as AxiosError<{ message?: string }>;
       console.error(error);
       toast.error(
-        `Category Adding failed: ${
-          err.response?.data?.message || err.message
-        }`
+        `Category Adding failed: ${err.response?.data?.message || err.message}`
       );
     } finally {
       setSubmitting(false);
@@ -143,9 +143,7 @@ const Page = () => {
     if (selectedCategory?._id) {
       try {
         setIsLoading(true);
-await axios.delete(
-          `/admin/delete-category/${selectedCategory._id}`
-        );
+        await axios.delete(`/admin/delete-category/${selectedCategory._id}`);
         toast.success("Category Deleted successfully!");
         onDeleteClose();
       } catch (error) {
@@ -180,7 +178,10 @@ await axios.delete(
                 <Input
                   type="text"
                   placeholder="Search"
+                  value={searchValue}
                   onChange={(e) => {
+                    const searchInput = e.target.value;
+                    setSearchValue(searchInput);
                     const filtered = categories?.filter((list) => {
                       return list.category
                         .toLowerCase()
@@ -258,8 +259,6 @@ await axios.delete(
           </TabPanel>
         </TabPanels>
       </Tabs>
-
-
       {/* Add Category Modal */}
       <Modal isOpen={isAddOpen} onClose={onAddClose} size="xl">
         <ModalOverlay />
@@ -273,7 +272,7 @@ await axios.delete(
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({  isSubmitting }) => (
+                {({ isSubmitting }) => (
                   <Form>
                     <div className="mb-5">
                       <label
@@ -310,8 +309,6 @@ await axios.delete(
           </div>
         </ModalContent>
       </Modal>
-
-
       {/* Delete Category Modal */}
       <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} size="xl">
         <ModalOverlay />
@@ -351,7 +348,6 @@ await axios.delete(
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
-      
     </>
   );
 };

@@ -85,6 +85,7 @@ const SalesPage = () => {
   const [currentPage, setCurrentPage] = useState<number | 1>(1);
   const [fromDate, setFromDate] = useState<string | "">("");
   const [toDate, setToDate] = useState<string | "">("");
+  const [searchValue, setSearchValue] = useState<string | "">("");
 
   const {
     isOpen: isFilterOpen,
@@ -118,7 +119,14 @@ const SalesPage = () => {
     };
 
     fetchInven();
-  }, [inventoryArray]);
+  }, []);
+
+
+   useEffect(() => {
+      if (searchValue.length == 0) {
+        setFilteredInventory(inventoryArray);
+      }
+    }, [searchValue]);
 
   // handles empty filter
   useEffect(() => {
@@ -164,17 +172,17 @@ const SalesPage = () => {
   );
 
   const inventoryCategories: string[] = [
-    ...new Set(inventoryArray.map((list) => list.category)),
+    ...new Set(inventoryArray.map((list) => list.category.toLowerCase())),
   ];
   const inventorySupplier: string[] = [
-    ...new Set(inventoryArray.map((list) => list.supplier)),
+    ...new Set(inventoryArray.map((list) => list.supplier.toLowerCase())),
   ];
  
   // filter by category
   const handleChangeCategory = (category: string) => {
     setSelectedCategory((prev: string[]) =>
       prev.includes(category)
-        ? prev.filter((list) => list !== category)
+        ? prev.filter((list) => list.toLowerCase() !== category.toLowerCase())
         : [...prev, category]
     );
   };
@@ -183,7 +191,7 @@ const SalesPage = () => {
   const handleChangeSupplier = (supplier: string) => {
     setSelectedSupplier((prev: string[]) =>
       prev.includes(supplier)
-        ? prev.filter((list) => list !== supplier)
+        ? prev.filter((list) => list.toLowerCase() !== supplier.toLowerCase())
         : [...prev, supplier]
     );
   };
@@ -248,7 +256,10 @@ const SalesPage = () => {
                 <Input
                   type="text"
                   placeholder="Search"
+                  value={searchValue}
                   onChange={(e) => {
+                    const searchInput = e.target.value;
+                    setSearchValue(searchInput);
                     const filtered = inventoryArray?.filter((list) => {
                       return list.itemName
                         .toLowerCase()
@@ -555,6 +566,7 @@ const SalesPage = () => {
                   setSelectedCategory([]);
                   setSelectedSupplier([]);
                   setSelectedAvailable([]);
+                  setSearchValue("");
                   setFromDate("");
                   setToDate("");
                   // onFilterClose();

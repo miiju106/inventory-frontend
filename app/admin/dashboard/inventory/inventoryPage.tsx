@@ -35,7 +35,6 @@ import {
   InputGroup,
   InputLeftElement,
   useDisclosure,
-  
 } from "@chakra-ui/react";
 import Image from "next/image";
 import { IoFilterOutline } from "react-icons/io5";
@@ -85,6 +84,7 @@ const InventoryPage = () => {
   const [currentPage, setCurrentPage] = useState<number | 1>(1);
   const [fromDate, setFromDate] = useState<string | "">("");
   const [toDate, setToDate] = useState<string | "">("");
+  const [searchValue, setSearchValue] = useState<string | "">("");
 
   const {
     isOpen: isFilterOpen,
@@ -131,7 +131,10 @@ const InventoryPage = () => {
     };
 
     fetchInven();
-  }, [inventoryArray]);
+    const interval = setInterval(fetchInven, 5000); // poll every 5s
+
+    return () => clearInterval(interval);
+  }, []);
 
   // handles empty filter
   useEffect(() => {
@@ -142,7 +145,18 @@ const InventoryPage = () => {
     ) {
       setFilteredInventory(inventoryArray);
     }
-  }, [selectedCategory, selectedSupplier, selectedAvailable, inventoryArray]);
+  }, [
+    selectedCategory,
+    selectedSupplier,
+    selectedAvailable,
+    inventoryArray.length,
+  ]);
+
+  useEffect(() => {
+    if (searchValue.length == 0) {
+      setFilteredInventory(inventoryArray);
+    }
+  }, [searchValue]);
 
   // handles view inventory
   const handleViewInventory = (inven: InventoryData): void => {
@@ -177,10 +191,10 @@ const InventoryPage = () => {
   );
 
   const inventoryCategories: string[] = [
-    ...new Set(inventoryArray.map((list) => list.category)),
+    ...new Set(inventoryArray.map((list) => list.category.toLowerCase())),
   ];
   const inventorySupplier: string[] = [
-    ...new Set(inventoryArray.map((list) => list.supplier)),
+    ...new Set(inventoryArray.map((list) => list.supplier.toLowerCase())),
   ];
   const inventoryAvailable: boolean[] = [
     ...new Set(inventoryArray.map((list) => list.available)),
@@ -190,7 +204,7 @@ const InventoryPage = () => {
   const handleChangeCategory = (category: string) => {
     setSelectedCategory((prev: string[]) =>
       prev.includes(category)
-        ? prev.filter((list) => list !== category)
+        ? prev.filter((list) => list.toLowerCase() !== category.toLowerCase())
         : [...prev, category]
     );
   };
@@ -199,7 +213,7 @@ const InventoryPage = () => {
   const handleChangeSupplier = (supplier: string) => {
     setSelectedSupplier((prev: string[]) =>
       prev.includes(supplier)
-        ? prev.filter((list) => list !== supplier)
+        ? prev.filter((list) => list.toLowerCase() !== supplier.toLowerCase())
         : [...prev, supplier]
     );
   };
@@ -243,6 +257,7 @@ const InventoryPage = () => {
         return selectedDate >= fromDateTime && selectedDate <= toDateTime;
       });
     }
+
     setFilteredInventory(output);
   };
 
@@ -284,7 +299,11 @@ const InventoryPage = () => {
                 <Input
                   type="text"
                   placeholder="Search"
+                  value={searchValue}
                   onChange={(e) => {
+                    const searchInput = e.target.value;
+                    setSearchValue(searchInput);
+
                     const filtered = inventoryArray?.filter((list) => {
                       return list.itemName
                         .toLowerCase()
@@ -573,7 +592,7 @@ const InventoryPage = () => {
                     checked={selectedSupplier.includes(list)}
                     onChange={() => handleChangeSupplier(list)}
                   />
-                  <span className="ml-2">{list.toLowerCase()}</span>
+                  <span className="ml-2">{list}</span>
                 </div>
               ))}
             </div>
@@ -627,6 +646,7 @@ const InventoryPage = () => {
                   setSelectedCategory([]);
                   setSelectedSupplier([]);
                   setSelectedAvailable([]);
+                  setSearchValue("");
                   setFromDate("");
                   setToDate("");
                   // onFilterClose();
