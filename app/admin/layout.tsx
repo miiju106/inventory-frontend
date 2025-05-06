@@ -1,14 +1,11 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ReactNode } from "react";
-
-
-
 import Sidebar from "@/components/sidebar";
 
 
 export const metadata = {
-  title: "Management",
-  description: "Inventory Frontend",
+  title: "Shoeven",
+  description: "Inventory App for managing shoe inventories",
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
