@@ -274,12 +274,15 @@ const InventoryPage = () => {
   const totalQtyWithTheSameItemName: number = salesArray.reduce(
     (acc: number, currentValue: SalesData) => {
       if (currentValue.stockId == selectedInventory?._id) {
-        acc = +currentValue.qty;
+        acc += currentValue.qty;
       }
       return acc;
     },
     0
   );
+
+ 
+  
 
   return (
     <>

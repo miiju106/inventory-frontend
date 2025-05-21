@@ -99,7 +99,7 @@ const Sidebar = () => {
           isSidebarOpen ? "w-[240px]" : "w-[70px]"
         } ${isSidebarVisible ? "w-full" : "hidden"} md:block `}
       >
-        <div className="flex flex-row-reverse w-full md:hidden">
+        <div className="flex flex-row-reverse w-full md:hidden p-3">
           <IoClose
             onClick={() => {
               setIsSidebarVisible(false);
@@ -110,7 +110,7 @@ const Sidebar = () => {
         <div className="flex flex-col ">
           {sidebarLink.map((list, index) => (
             <Link
-              className={`flex w-full gap-2 items-center group hover:bg-[#FFE7BB] p-3 ${
+              className={`flex w-full gap-2 items-center group hover:bg-[#5A05BA]/20 p-3 ${
                 pathname == list.path ? "bg-[#5A05BA]/40 text-white" : ""
               }`}
               key={index}
@@ -134,7 +134,7 @@ const Sidebar = () => {
             </Link>
           ))}
           <div
-            className=" flex w-full gap-2 items-center group hover:bg-[#FFE7BB] p-3"
+            className=" flex w-full gap-2 items-center group hover:bg-[#5A05BA]/20 p-3"
             onClick={() => logOutByUser()}
           >
             <div>
