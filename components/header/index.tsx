@@ -80,7 +80,7 @@ const Header = () => {
     });
 
     newSocket.on("new-sales", (notification: Notification) => {     
-      setNotifications((prev) => [notification, ...prev]);
+      setNotifications((prev) => [ ...prev, notification]);
     });
 
     // clean up unmount
