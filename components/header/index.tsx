@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export type Notification = {
   message: string;
@@ -58,7 +59,7 @@ export type Notification = {
 const Header = () => {
   const [openModal, setOpenModal] = useState<boolean | false>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  
+  const router = useRouter();
 
   useEffect(() => {
     const fetchNoti = async () => {
@@ -79,8 +80,8 @@ const Header = () => {
       console.log("Connected to notification server");
     });
 
-    newSocket.on("new-sales", (notification: Notification) => {     
-      setNotifications((prev) => [ ...prev, notification]);
+    newSocket.on("new-sales", (notification: Notification) => {
+      setNotifications((prev) => [...prev, notification]);
     });
 
     // clean up unmount
@@ -89,12 +90,8 @@ const Header = () => {
     };
   }, []);
 
- 
-
-
   const handleReadNotification = async (id: string) => {
     try {
-     
       await axios.put(`/admin/notifications/${id}/read`);
       setNotifications((prev) => prev.filter((notif) => notif._id !== id));
       toast.success("Notification Read successfully");
@@ -106,10 +103,13 @@ const Header = () => {
           err.response?.data?.message || err.message
         }`
       );
-    } 
+    }
   };
 
-
+  const handleSeeMoreReads = () => {
+    router.push("/admin/dashboard/notifications");
+    setOpenModal(false);
+  };
 
   return (
     <div className="flex flex-row-reverse p-5">
@@ -170,9 +170,12 @@ const Header = () => {
                 </div>
 
                 <div className="bg-white flex flex-row-reverse">
-                  <Link href="/admin/dashboard/notifications" className="text-sm font-semibold hover:text-[#5A05BA]/40 cursor-pointer">
+                  <p
+                    className="text-sm font-semibold hover:text-[#5A05BA]/40 cursor-pointer"
+                    onClick={handleSeeMoreReads}
+                  >
                     See More UnReads
-                  </Link>
+                  </p>
                 </div>
               </div>
             ) : (
