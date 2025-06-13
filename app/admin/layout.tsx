@@ -14,7 +14,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <ProtectedRoute requiredRoles={["admin"]}>
       <div className="flex max-w-[1920px] mx-auto">
         <Sidebar/>
-        <div className="w-full mt-6 md:mt-0">
+        <div className="w-full mt-16 md:mt-0">
           <Header/>
           <div className="px-5">{children}</div>
         </div>

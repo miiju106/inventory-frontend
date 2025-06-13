@@ -56,7 +56,7 @@ export type Notification = {
 //   },
 // ];
 
-const Header = () => {
+const MobileNotifications = () => {
   const [openModal, setOpenModal] = useState<boolean | false>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
@@ -112,7 +112,7 @@ const Header = () => {
   };
 
   return (
-    <div className="hidden md:flex flex-row-reverse p-5">
+    <div className="">
       <div className="relative">
         <IoMdNotificationsOutline
           size={24}
@@ -188,4 +188,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default MobileNotifications;

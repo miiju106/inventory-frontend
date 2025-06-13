@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { BsGrid } from "react-icons/bs";
 import { MdOutlineInventory2 } from "react-icons/md";
 import Link from "next/link";
-import { FiMenu} from "react-icons/fi";
+import { FiMenu } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { BiPurchaseTagAlt } from "react-icons/bi";
 import { TbViewfinder } from "react-icons/tb";
@@ -11,6 +11,7 @@ import { BiCategoryAlt } from "react-icons/bi";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { IoIosLogOut } from "react-icons/io";
+import MobileNotifications from "../MobileNotifications";
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean | true>(true);
@@ -90,9 +91,15 @@ const Sidebar = () => {
 
   return (
     <aside>
-      <button className="md:hidden fixed top-4 px-5">
-        <FiMenu size={24} onClick={toggleSidebarVisible} />
-      </button>
+      <div className="md:hidden fixed top-4 px-5 w-full">
+        <div className="flex justify-between items-center w-full py-2">
+          <button className="">
+            <FiMenu size={24} onClick={toggleSidebarVisible} />
+          </button>
+
+          <MobileNotifications />
+        </div>
+      </div>
 
       <div
         className={`h-screen md:sticky fixed top-0 bg-gray-100 py-5 z-[100] ${
