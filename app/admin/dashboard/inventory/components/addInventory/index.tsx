@@ -13,8 +13,12 @@ import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
 import axios from "@/utils/api";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import { AxiosError } from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { FaUpload } from "react-icons/fa";
+import Image from "next/image";
+import { useRef } from "react";
 
 const validationSchema = Yup.object({
   itemName: Yup.string().required("Stock name is required"),
@@ -26,9 +30,9 @@ const validationSchema = Yup.object({
     .typeError("Price must be a number")
     .required("Price is required"),
   supplier: Yup.string().required("Supplier is required"),
-  // images: Yup.array()
-  //   .of(Yup.string().required("Image is required"))
-  //   .min(1, "At least one image is required"),
+  images: Yup.array()
+    .min(1, "At least one image is required")
+    .max(3, "You can upload a maximum of 3 images"),
 });
 
 interface FormInventory {
@@ -37,10 +41,11 @@ interface FormInventory {
   qty: number;
   price: number;
   supplier: string;
+  images: File[];
 }
 
 type AddModalProps = {
-  isAddOpen: boolean; 
+  isAddOpen: boolean;
   onAddClose: () => void;
 };
 
@@ -57,6 +62,7 @@ type Supplier = {
 const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
   const [categories, setCategories] = useState<Category[] | []>([]);
   const [suppliers, setSuppliers] = useState<Supplier[] | []>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchId = async () => {
@@ -82,6 +88,7 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
     qty: 0,
     price: 0,
     supplier: "",
+    images: [],
   };
 
   categories?.sort((a: Category, b: Category) => {
@@ -108,8 +115,22 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
     values: Record<string, any>,
     { setSubmitting, resetForm }: FormikHelpers<FormInventory>
   ) => {
+    const formValues = {
+      itemName: values.itemName,
+      category: values.category,
+      qty: values.qty,
+      price: values.price,
+      supplier: values.supplier,
+    };
+    const formDataToSend = new FormData();
+
+    Object.entries(formValues).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+    values.images.forEach((img: File) => formDataToSend.append("images", img));
+
     try {
-      await axios.post("/admin/add-stock", values);
+      await axios.post("/admin/add-stock", formDataToSend);
       toast.success("Stock Added successfully!");
       resetForm();
     } catch (error) {
@@ -137,7 +158,7 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting }) => (
+                {({ isSubmitting, values, setFieldValue }) => (
                   <Form>
                     <div className="mb-5">
                       <label
@@ -235,61 +256,74 @@ const AddInventory = ({ isAddOpen, onAddClose }: AddModalProps) => {
                       />
                     </div>
 
-                    {/* <div className="mb-5">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Property Image<span className="text-red-500">*</span>
-                          </label>
-                          <FieldArray name="images">
-                            {({ remove, push }) => (
-                              <div>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    document.getElementById("image-input").click()
-                                  }
-                                  className="flex items-center px-4 py-2 border border-main text-main rounded-md hover:bg-main hover:text-white"
-                                >
-                                  <FaUpload className="mr-2" />
-                                  Select Images
-                                </button>
-                                <input
-                                  id="image-input"
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => handleImageChange(e, push)}
-                                />
-                                <ErrorMessage
-                                  name="images"
-                                  component="p"
-                                  className="text-red-500 text-sm mt-1"
-                                />
-                                {values.images && values.images.length > 0 && (
-                                  <div className="flex gap-4 flex-wrap mt-4">
-                                    {values.images.map((image, index) => (
-                                      <div key={index} className="relative w-40 h-40">
-                                        <Image
-                                          width={500}
-                                          height={500}
-                                          src={image}
-                                          alt="property"
-                                          className="w-full h-full object-cover rounded-md"
-                                        />
-                                        <button
-                                          type="button"
-                                          className="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 hover:text-red-700"
-                                          onClick={() => remove(index)}
-                                        >
-                                          <AiOutlineClose size={20} />
-                                        </button>
-                                      </div>
-                                    ))}
+                    <div className="mb-5">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Images<span className="text-red-500"></span>
+                      </label>
+                      <FieldArray name="images">
+                        {({ remove }) => (
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex items-center px-4 py-2 border border-main text-main rounded-md"
+                            >
+                              <FaUpload className="mr-2" />
+                              Upload Images(you can upload up to three images,
+                              each must have a max size of 5mb)
+                            </button>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                if (e.target.files) {
+                                  const newFiles = Array.from(e.target.files);
+                                  const currentFiles = values.images || [];
+                                  setFieldValue("images", [
+                                    ...currentFiles,
+                                    ...newFiles,
+                                  ]);
+                                }
+                              }}
+                            />
+                            <ErrorMessage
+                              name="images"
+                              component="p"
+                              className="text-red-500 text-sm mt-1"
+                            />
+
+                            {values.images && values.images.length > 0 && (
+                              <div className="flex gap-4 flex-wrap mt-4">
+                                {values?.images.map((image, index) => (
+                                  <div
+                                    key={index}
+                                    className="relative w-40 h-40"
+                                  >
+                                    <Image
+                                      width={500}
+                                      height={500}
+                                      src={URL.createObjectURL(image)}
+                                      alt="property"
+                                      className="w-full h-full object-cover rounded-md"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 hover:text-red-700"
+                                      onClick={() => remove(index)}
+                                    >
+                                      <AiOutlineClose size={20} />
+                                    </button>
                                   </div>
-                                )}
+                                ))}
                               </div>
                             )}
-                          </FieldArray>
-                        </div> */}
+                          </div>
+                        )}
+                      </FieldArray>
+                    </div>
 
                     <div className="mb-5">
                       <label

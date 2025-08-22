@@ -47,6 +47,7 @@ import Pagination from "@/components/pagination";
 import AddInventory from "./components/addInventory";
 import DeleteInventory from "./components/deleteInventory";
 import SellInventory from "./components/sellInventory";
+import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
 
 type InventoryData = {
   _id: string;
@@ -59,6 +60,7 @@ type InventoryData = {
   sold: boolean;
   createdAt: string;
   updatedAt: string;
+  images: string[];
 };
 
 type SalesData = {
@@ -85,6 +87,7 @@ const InventoryPage = () => {
   const [fromDate, setFromDate] = useState<string | "">("");
   const [toDate, setToDate] = useState<string | "">("");
   const [searchValue, setSearchValue] = useState<string | "">("");
+  const [currentIndex, setCurrentIndex] = useState<number | 0>(0);
 
   const {
     isOpen: isFilterOpen,
@@ -281,7 +284,21 @@ const InventoryPage = () => {
     0
   );
 
- 
+  const nextImg = () => {
+    if (
+      selectedInventory?.images.length &&
+      currentIndex < selectedInventory?.images.length - 1
+    ) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  const prevImg = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
   
 
   return (
@@ -429,14 +446,47 @@ const InventoryPage = () => {
             {selectedInventory && (
               <div className="space-y-4">
                 <div className="flex flex-col gap-4">
-                  <Image
-                    src="https://placehold.co/100x100"
-                    alt={selectedInventory.itemName}
-                    width={50}
-                    height={50}
-                    className="w-20 h-20 rounded-full"
-                    unoptimized
-                  />
+                  {selectedInventory.images.length ? (
+                    <div className="w-full flex justify-between items-center h-[300px]">
+                      <FaArrowCircleLeft
+                        size={24}
+                        onClick={prevImg}
+                        className={`  ${
+                          currentIndex === 0
+                            ? "text-gray-50"
+                            : "hover:text-[#5A05BA]/20 cursor-pointer"
+                        }`}
+                      />
+                      <div className="w-4/5 h-full">
+                        <Image
+                          src={selectedInventory?.images[currentIndex]}
+                          alt={selectedInventory.itemName}
+                          width={450}
+                          height={450}
+                          className="rounded-full object-cover "
+                        />
+                      </div>
+
+                      <FaArrowCircleRight
+                        size={24}
+                        onClick={nextImg}
+                        className={` ${
+                          currentIndex === selectedInventory?.images.length - 1
+                            ? "text-gray-50"
+                            : "hover:text-[#5A05BA]/20 cursor-pointer"
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src="https://placehold.co/100x100"
+                      alt={selectedInventory.itemName}
+                      width={50}
+                      height={50}
+                      className="w-20 h-20 rounded-full"
+                      unoptimized
+                    />
+                  )}
 
                   <div>
                     <h3 className="text-main">
@@ -508,47 +558,6 @@ const InventoryPage = () => {
                     </p>
                   </div>
                 </div>
-
-                {/* <div>
-                  <p className="">Author</p>
-                  <div className="flex gap-3 items-center justify-between">
-                    <div className="border py-2 px-4 rounded-md">
-                      <p className="text-black text-sm">
-                        {selectedInventory.createdBy?.name || "No name"}
-                      </p>
-                    </div>
-
-                    <Link
-                      href={`/portal/users/${selectedInventory.createdBy?._id}`}
-                      target="_blank"
-                      className="underline"
-                    >
-                      View Author
-                    </Link>
-                  </div>
-                </div> */}
-
-                {/* <div>
-                  <p className="mb-2">Sales Page Information</p>
-                  <div className="space-y-4">
-                    <div className="flex gap-3 items-center justify-between">
-                      <div className="text-black flex flex-col">
-                        <p className="text-sm">Web address: </p>
-                        <div className="border py-2 px-4 rounded-md text-sm">
-                          {selectedInventory.slug || "draft"}
-                        </div>
-                      </div>
-
-                      <Link
-                        href={selectedInventory.slug || "#"}
-                        target="_blank"
-                        className="underline"
-                      >
-                        View Sales Page
-                      </Link>
-                    </div>
-                  </div>
-                </div> */}
               </div>
             )}
           </DrawerBody>

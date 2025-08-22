@@ -1,15 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Formik, Form, Field, ErrorMessage} from "formik";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import { useParams } from "next/navigation";
 import axios from "@/utils/api";
 import * as Yup from "yup";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaArrowLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { toast} from "react-toastify";
+import { toast } from "react-toastify";
 import { FormikHelpers } from "formik";
 import { AxiosError } from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { FaUpload } from "react-icons/fa";
+import Image from "next/image";
+import { useRef } from "react";
 
 // type InventoryData = {
 //   _id: string;
@@ -31,7 +35,7 @@ interface FormInventory {
   price: number;
   supplier: string;
   available: boolean;
-  // sold: boolean;
+  images: File[];
 }
 
 interface InventoryData {
@@ -61,9 +65,7 @@ const validationSchema = Yup.object({
   supplier: Yup.string().required("Supplier is required"),
   available: Yup.boolean().required("Availability is required"),
   // sold: Yup.boolean().required("sold status is required"),
-  // images: Yup.array()
-  //   .of(Yup.string().required("Image is required"))
-  //   .min(1, "At least one image is required"),
+  images: Yup.array(),
 });
 
 const Page = () => {
@@ -71,15 +73,16 @@ const Page = () => {
     useState<InventoryData | null>(null);
   const [loading, setLoading] = useState<boolean | false>(false);
   const [categories, setCategories] = useState<Category[] | []>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[] | []>([]); 
+  const [suppliers, setSuppliers] = useState<Supplier[] | []>([]);
   const { id } = useParams();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchId = async () => {
       try {
         setLoading(true);
-       
+
         const [res1, res2, res3] = await Promise.all([
           axios.get(`/user/get-stock/${id}`),
           axios.get("/admin/get-category"),
@@ -103,13 +106,16 @@ const Page = () => {
     return <div>Loading</div>;
   }
 
+  console.log("selectedInventory", selectedInventory);
+
   const initialValues: FormInventory = {
     itemName: selectedInventory?.itemName || "",
     category: selectedInventory?.category || "",
     qty: selectedInventory?.qty || 0,
     price: selectedInventory?.price || 0,
     supplier: selectedInventory?.supplier || "",
-    available: selectedInventory?.available || false,
+    available: selectedInventory?.available,
+    images: [],
     // sold: selectedInventory?.sold || false,
   };
 
@@ -128,31 +134,27 @@ const Page = () => {
     values: Record<string, any>,
     { setSubmitting }: FormikHelpers<FormInventory>
   ) => {
-    const formData:Record<string, any> = {
-      ...values,
-      available: values.available === "true",
+    const formData: Record<string, any> = {
+      itemName: values.itemName,
+      category: values.category,
+      qty: values.qty,
+      price: values.price,
+      supplier: values.supplier,
+      available:
+        typeof values.available == "string"
+          ? values.available === "true"
+          : values.available === true,
     };
 
-    if (!selectedInventory) {
-      toast.error("No item selected");
-      setSubmitting(false);
-      return;
-    }
-    const updatedItem: Record<string, any> = Object.keys(
-      selectedInventory
-    ).reduce((acc: Record<string, any>, current: string) => {
-      if (formData[current] !== selectedInventory[current]) {
-        acc[current] = formData[current];
-      }
+    const formDataToSend = new FormData();
 
-      return acc;
-    }, {});
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+    values.images.forEach((img: File) => formDataToSend.append("images", img));
 
     try {
-      await axios.put(
-        `/admin/update-stock/${id}`,
-        updatedItem
-      );
+      await axios.put(`/admin/update-stock/${id}`, formDataToSend);
 
       toast.success("Stock Updated successfully!");
     } catch (error) {
@@ -165,6 +167,25 @@ const Page = () => {
       setSubmitting(false);
     }
   };
+
+  const handleDeleteImg = async (imageUrl: string): Promise<void> => {
+  console.log("Deleting image:", imageUrl);
+
+  try {
+    await axios.delete(`/admin/delete-stockImg/${id}`, {
+      data: { imageUrl }, // req.body
+    });
+
+    toast.success("Image deleted successfully!");
+  } catch (error) {
+    const err = error as AxiosError<{ message?: string }>;
+    console.error("Delete error:", err);
+
+    toast.error(
+      `Image delete failed: ${err.response?.data?.message || err.message}`
+    );
+  }
+};
 
   return (
     <div className="space-y-5 p-5">
@@ -182,7 +203,7 @@ const Page = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, isSubmitting}) => (
+        {({ values, isSubmitting, setFieldValue }) => (
           <Form>
             <div className="mb-5">
               <label
@@ -287,43 +308,92 @@ const Page = () => {
               />
             </div>
 
-            {/* <div className="mb-5">
+            <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Image<span className="text-red-500">*</span>
+                Existing Images
+              </label>
+              {selectedInventory !== null && (
+                <div className="flex gap-4 flex-wrap mt-4">
+                  {selectedInventory.images.length > 0 &&
+                    selectedInventory?.images.map(
+                      (image: string, index: number) => (
+                        <div key={index} className="relative w-40 h-40">
+                          <Image
+                            width={500}
+                            height={500}
+                            src={image}
+                            alt="property"
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            className="absolute p-1 rounded-full top-1 right-1 bg-gray-200 hover:bg-[#5A05BA]/70 hover:text-white text-black"
+                            onClick={() => handleDeleteImg(image)}
+                          >
+                            <div className="relative group">
+                              <AiOutlineClose size={18} />
+                              <span className="z-100 absolute top-4 left-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-black">
+                                Delete
+                              </span>
+                            </div>
+                          </button>
+                        </div>
+                      )
+                    )}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Images<span className="text-red-500"></span>
               </label>
               <FieldArray name="images">
-                {({ remove, push }) => (
+                {({ remove }) => (
                   <div>
                     <button
                       type="button"
-                      onClick={() =>
-                        document.getElementById("image-input").click()
-                      }
-                      className="flex items-center px-4 py-2 border border-main text-main rounded-md hover:bg-main hover:text-white"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center px-4 py-2 border border-main text-main rounded-md"
                     >
                       <FaUpload className="mr-2" />
-                      Select Images
+                      Update Images
                     </button>
+                    <span className="text-sm font-semibold">
+                      NB you can only add {3 - selectedInventory?.images.length}{" "}
+                      more image(s) to the existing images
+                    </span>
                     <input
-                      id="image-input"
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
-                      onChange={(e) => handleImageChange(e, push)}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const newFiles = Array.from(e.target.files);
+                          const currentFiles = values.images || [];
+                          setFieldValue("images", [
+                            ...currentFiles,
+                            ...newFiles,
+                          ]);
+                        }
+                      }}
                     />
                     <ErrorMessage
                       name="images"
                       component="p"
                       className="text-red-500 text-sm mt-1"
                     />
+
                     {values.images && values.images.length > 0 && (
                       <div className="flex gap-4 flex-wrap mt-4">
-                        {values.images.map((image, index) => (
+                        {values?.images.map((image, index) => (
                           <div key={index} className="relative w-40 h-40">
                             <Image
                               width={500}
                               height={500}
-                              src={image}
+                              src={URL.createObjectURL(image)}
                               alt="property"
                               className="w-full h-full object-cover rounded-md"
                             />
@@ -341,7 +411,7 @@ const Page = () => {
                   </div>
                 )}
               </FieldArray>
-            </div> */}
+            </div>
 
             <div className="mb-5">
               <label
@@ -362,134 +432,6 @@ const Page = () => {
                 className="text-red-500 text-sm mt-1"
               />
             </div>
-
-            {/* <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Features<span className="text-red-500">*</span>
-              </label>
-              <FieldArray name="features">
-                {({ remove, push }) => (
-                  <div>
-                    <div className="flex gap-2">
-                      <Field
-                        name="featureInput"
-                        placeholder="Enter feature and press +"
-                        className="border p-2 w-full"
-                      />
-                      <button
-                        type="button"
-                        className="border p-2 bg-main text-white"
-                        onClick={() => {
-                          const featureVal = values.featureInput;
-                          if (featureVal && featureVal.trim() !== "") {
-                            push(featureVal);
-                            setFieldValue("featureInput", "");
-                          }
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {values.features.map((f, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center bg-gray-200 px-2 py-1 rounded"
-                        >
-                          <span>{f}</span>
-                          <AiOutlineClose
-                            className="ml-2 cursor-pointer"
-                            onClick={() => remove(i)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <ErrorMessage
-                      name="features"
-                      component="p"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
-                )}
-              </FieldArray>
-            </div> */}
-
-            {/* <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Accessibility<span className="text-red-500">*</span>
-              </label>
-              <FieldArray name="accessibility">
-                {({ remove, push }) => (
-                  <div>
-                    <div className="flex gap-2">
-                      <Field
-                        name="accessibilityInput"
-                        placeholder="Enter accessibility and press +"
-                        className="border p-2 w-full"
-                      />
-                      <button
-                        type="button"
-                        className="border p-2 bg-main text-white"
-                        onClick={() => {
-                          const accessVal = values.accessibilityInput;
-                          if (accessVal && accessVal.trim() !== "") {
-                            push(accessVal);
-                            setFieldValue("accessibilityInput", "");
-                          }
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {values.accessibility.map((a, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center bg-gray-200 px-2 py-1 rounded"
-                        >
-                          <span>{a}</span>
-                          <AiOutlineClose
-                            className="ml-2 cursor-pointer"
-                            onClick={() => remove(i)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <ErrorMessage
-                      name="accessibility"
-                      component="p"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
-                )}
-              </FieldArray>
-            </div> */}
-
-            {/* <div className="mb-5 relative">
-              <label
-                htmlFor="sold"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Sold<span className="text-red-500">*</span>
-              </label>
-              <Field
-                as="select"
-                name="sold"
-                className="border p-2 w-full appearance-none"
-              >
-                <option value={`${values.sold}`}>
-                  {values.sold ? "yes" : "no"}
-                </option>
-                {values.sold && <option value="false">no</option>}
-                {!values.sold && <option value="true">yes</option>}
-              </Field>
-              <IoIosArrowDown className="absolute right-3 top-9 text-gray-400 pointer-events-none" />
-              <ErrorMessage
-                name="sold"
-                component="p"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div> */}
 
             <div className="mb-5 relative">
               <label
@@ -525,8 +467,6 @@ const Page = () => {
               >
                 {isSubmitting ? "Saving" : "Save"}
               </button>
-
-              
             </div>
           </Form>
         )}
